@@ -18,7 +18,7 @@ const CostEstimationSummary = () => {
   const [loading, setLoading] = useState(true);
 
   const calculateCostEstimate = useCallback(() => {
-    const { userData, selectedProvider } = state;
+    const { userData, selectedProvider, bookingData } = state;
     
     // Simple fallback cost estimate since we don't have real insurance data
     const basePrice = 150; // Default office visit cost
@@ -34,7 +34,8 @@ const CostEstimationSummary = () => {
       coveredAmount,
       outOfPocketCost,
       insurance: userData?.insuranceProvider || 'Standard Plan',
-      provider: selectedProvider
+      provider: selectedProvider,
+      appointment_time: bookingData?.appointment_time || null // <-- Add this line
     };
   }, [state]);
 
@@ -119,14 +120,14 @@ const CostEstimationSummary = () => {
               <Box sx={{ borderTop: '1px solid #e1e5e9', pt: 3, mb: 3 }}>
                 <Stack direction="row" justifyContent="space-between" mb={2}>
                   <Typography>Base Price:</Typography>
-                  <Typography fontWeight={700}>${costEstimate.basePrice}</Typography>
+                  <Typography fontWeight={700}>${costEstimate.basePrice.toFixed(2)}</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between" mb={2}>
                   <Typography>Insurance Coverage ({costEstimate.coveragePercentage}%):</Typography>
                   <Typography sx={{ color: '#28a745', fontWeight: 700 }}>-${costEstimate.coveredAmount.toFixed(2)}</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" pt={2} borderTop="2px solid #e1e5e9" fontSize="1.2rem" fontWeight={700} color="#dc3545">
-                  <Typography>Your Cost:</Typography>
+                  <Typography>Final Out-of-Pocket Cost:</Typography>
                   <Typography>${costEstimate.outOfPocketCost.toFixed(2)}</Typography>
                 </Stack>
               </Box>

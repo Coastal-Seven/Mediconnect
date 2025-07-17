@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import users, providers, bookings, intake, insurance
+from routes import users, providers, bookings, intake, insurance , ai_gemini
 import logging
 
 # Configure logging
@@ -22,6 +22,7 @@ app.include_router(providers.router, prefix="/api/providers", tags=["Providers"]
 app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
 app.include_router(intake.router, prefix="/api/intake", tags=["Intake"])
 app.include_router(insurance.router, prefix="/api/insurance", tags=["Insurance"])
+app.include_router(ai_gemini.router, prefix="/api/ai/gemini-care-tips", tags=["AIGeneratedCare"])
 
 @app.get("/")
 def root():

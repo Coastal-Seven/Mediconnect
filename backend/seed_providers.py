@@ -5,7 +5,8 @@ Script to seed the database with sample healthcare providers
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGODB_URI = "mongodb+srv://jaswanth:jaswanth123@cluster0.zjp1qm5.mongodb.net/smartcare?retryWrites=true&w=majority&appName=Cluster0"
+MONGODB_URI = os.getenv("MONGODB_URI")
+#MONGODB_URI = "mongodb+srv://jaswanth:jaswanth123@cluster0.zjp1qm5.mongodb.net/smartcare?retryWrites=true&w=majority&appName=Cluster0"
 DB_NAME = "smartcare"
 
 # Only these insurances are allowed

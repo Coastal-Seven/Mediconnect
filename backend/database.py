@@ -29,6 +29,10 @@ class InMemoryDB:
         if collection_name not in self.collections:
             self.collections[collection_name] = InMemoryCollection()
         return self.collections[collection_name]
+    
+    def __getattr__(self, collection_name):
+        # Allow attribute access for collections (e.g., db.users)
+        return self.__getitem__(collection_name)
 
 class InMemoryCollection:
     def __init__(self):
