@@ -2,11 +2,11 @@
 """
 Script to seed the database with sample healthcare providers
 """
+import os
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 
 MONGODB_URI = os.getenv("MONGODB_URI")
-#MONGODB_URI = "mongodb+srv://jaswanth:jaswanth123@cluster0.zjp1qm5.mongodb.net/smartcare?retryWrites=true&w=majority&appName=Cluster0"
 DB_NAME = "smartcare"
 
 # Only these insurances are allowed
@@ -35,7 +35,10 @@ providers = [
         "email": "dr.rajesh@apollohospital.com",
         "experience": "15 years",
         "education": "AIIMS Delhi",
-        "hospital": "Apollo Hospital, Guntur"
+        "hospital": "Apollo Hospital, Guntur",
+        "city": "Guntur",
+        "state": "AP",
+        "pincode": "522001"
     },
     {
         "_id": "prov_002",
@@ -51,7 +54,10 @@ providers = [
         "email": "dr.priya@carehospital.com",
         "experience": "12 years",
         "education": "CMC Vellore",
-        "hospital": "Care Hospital, Vijayawada"
+        "hospital": "Care Hospital, Vijayawada",
+        "city": "Vijayawada",
+        "state": "AP",
+        "pincode": "520010"
     },
     {
         "_id": "prov_003",
@@ -67,7 +73,10 @@ providers = [
         "email": "dr.suresh@kimshospital.com",
         "experience": "18 years",
         "education": "Osmania Medical College",
-        "hospital": "KIMS Hospital, Mangalagiri"
+        "hospital": "KIMS Hospital, Mangalagiri",
+        "city": "Mangalagiri",
+        "state": "AP",
+        "pincode": "522503"
     },
     {
         "_id": "prov_004",
@@ -83,7 +92,10 @@ providers = [
         "email": "dr.lakshmi@fernandezhospital.com",
         "experience": "14 years",
         "education": "Gandhi Medical College",
-        "hospital": "Fernandez Hospital, Tadepalli"
+        "hospital": "Fernandez Hospital, Tadepalli",
+        "city": "Tadepalli",
+        "state": "AP",
+        "pincode": "522501"
     },
     {
         "_id": "prov_005",
@@ -99,7 +111,10 @@ providers = [
         "email": "dr.venkatesh@nimshospital.com",
         "experience": "22 years",
         "education": "NIMS Hyderabad",
-        "hospital": "NIMS Hospital, Guntur"
+        "hospital": "NIMS Hospital, Guntur",
+        "city": "Guntur",
+        "state": "AP",
+        "pincode": "522002"
     },
     {
         "_id": "prov_006",
@@ -115,7 +130,10 @@ providers = [
         "email": "dr.anjali@rainbowhospital.com",
         "experience": "16 years",
         "education": "KEM Hospital Mumbai",
-        "hospital": "Rainbow Children's Hospital, Vijayawada"
+        "hospital": "Rainbow Children's Hospital, Vijayawada",
+        "city": "Vijayawada",
+        "state": "AP",
+        "pincode": "520008"
     },
     {
         "_id": "prov_007",
@@ -131,7 +149,10 @@ providers = [
         "email": "dr.mohan@srisaihospital.com",
         "experience": "20 years",
         "education": "AIIMS Delhi",
-        "hospital": "AIIMS ,Mangalagiri"
+        "hospital": "AIIMS ,Mangalagiri",
+        "city": "Mangalagiri",
+        "state": "AP",
+        "pincode": "522504"
     },
     {
         "_id": "prov_008",
@@ -147,11 +168,14 @@ providers = [
         "email": "dr.geetha@lakshmieyehospital.com",
         "experience": "13 years",
         "education": "Sankara Nethralaya",
-        "hospital": "Lakshmi Eye Hospital, Tadepalli"
+        "hospital": "Lakshmi Eye Hospital, Tadepalli",
+        "city": "Tadepalli",
+        "state": "AP",
+        "pincode": "522502"
     },
     {
         "_id": "prov_009",
-        "name": "Dr. Ramesh Babu",
+        "name": "Dr. Omkar",
         "specialty": "ENT Specialist",
         "accepted_insurances": ["Star Health", "Bajaj Allianz", "Cigna TTK"],
         "location_lat": 16.3067,
@@ -163,7 +187,10 @@ providers = [
         "email": "dr.ramesh@entcarecenter.com",
         "experience": "17 years",
         "education": "MAMC Delhi",
-        "hospital": "ENT Care Center, Guntur"
+        "hospital": "ENT Care Center, Guntur",
+        "city": "Guntur",
+        "state": "AP",
+        "pincode": "522003"
     },
     {
         "_id": "prov_010",
@@ -179,14 +206,17 @@ providers = [
         "email": "dr.sunita@mindwellnessclinic.com",
         "experience": "19 years",
         "education": "NIMHANS Bangalore",
-        "hospital": "Mind Wellness Clinic, Vijayawada"
+        "hospital": "Mind Wellness Clinic, Vijayawada",
+        "city": "Vijayawada",
+        "state": "AP",
+        "pincode": "520012"
     },
     # Top 3 relevant providers for Rash, Cough, HDFC ERGO - My Health, Guntur
     {
         "_id": "prov_011",
         "name": "Dr. Priya Sharma",
         "specialty": "Dermatology",
-        "address": "Skin Wellness Clinic, Guntur, Andhra Pradesh - 522034",
+        "address": "Skin Wellness Clinic, Guntur, Andhra Pradesh - 522001",
         "city": "Guntur",
         "state": "AP",
         "pincode": "522034",
@@ -202,7 +232,7 @@ providers = [
         "_id": "prov_012",
         "name": "Dr. Ravi Kumar",
         "specialty": "General Physician",
-        "address": "City Health Center, Guntur, Andhra Pradesh - 522034",
+        "address": "City Health Center, Guntur, Andhra Pradesh - 522007",
         "city": "Guntur",
         "state": "AP",
         "pincode": "522034",
@@ -218,7 +248,7 @@ providers = [
         "_id": "prov_013",
         "name": "Dr. Sneha Reddy",
         "specialty": "Pulmonologist",
-        "address": "Lung Care Clinic, Guntur, Andhra Pradesh - 522034",
+        "address": "Lung Care Clinic, Guntur, Andhra Pradesh - 522001",
         "city": "Guntur",
         "state": "AP",
         "pincode": "522034",
@@ -283,7 +313,7 @@ providers = [
         "_id": "prov_017",
         "name": "Dr. Suresh Kumar",
         "specialty": "Internal Medicine",
-        "address": "City Internal Medicine, Guntur, Andhra Pradesh - 522034",
+        "address": "City Internal Medicine, Guntur, Andhra Pradesh - 522001",
         "city": "Guntur",
         "state": "AP",
         "pincode": "522034",
@@ -299,7 +329,7 @@ providers = [
         "_id": "prov_018",
         "name": "Dr. Ananya Das",
         "specialty": "Family Medicine",
-        "address": "Family Care Clinic, Guntur, Andhra Pradesh - 522034",
+        "address": "Family Care Clinic, Guntur, Andhra Pradesh",
         "city": "Guntur",
         "state": "AP",
         "pincode": "522034",

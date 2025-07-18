@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import GoogleMapReact from 'google-map-react';
 // Add framer-motion import
 import { motion } from 'framer-motion';
+import { fetchWithAuth } from '../utils/authFetch';
 
 const MapMarker = ({ text }) => (
   <div style={{ color: 'red', fontWeight: 'bold', fontSize: '24px' }}>
@@ -70,6 +71,14 @@ const ProviderDetailBooking = () => {
       return;
     }
 
+    // Check for access token before proceeding
+    const accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+      alert('Please login first');
+      navigate('/login');
+      return;
+    }
+
     try {
       // Get user ID from context
       const user = state.user;
@@ -91,13 +100,9 @@ const ProviderDetailBooking = () => {
         member_id: state.userData.memberId,
       };
 
-      // Real API call to backend
-      const response = await fetch('http://127.0.0.1:8000/api/bookings/', {
+      // Use fetchWithAuth for authenticated request
+      const response = await fetchWithAuth('http://127.0.0.1:8000/api/bookings/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
         body: JSON.stringify(bookingData)
       });
 

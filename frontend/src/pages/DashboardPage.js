@@ -310,7 +310,7 @@ const DashboardPage = () => {
               <Stack direction="row" alignItems="center" spacing={2}>
                 <Avatar sx={{ width: 50, height: 50, bgcolor: '#fff3e0', color: 'black', fontSize: 24 }}>💰</Avatar>
                 <Box>
-                  <Typography variant="h5" sx={{ color: '#333', fontWeight: 700 }}>₹2,500</Typography>
+                  <Typography variant="h5" sx={{ color: '#333', fontWeight: 700 }}>$10</Typography>
                   <Typography variant="body2" sx={{ color: '#666' }}>Estimated Savings</Typography>
                 </Box>
               </Stack>

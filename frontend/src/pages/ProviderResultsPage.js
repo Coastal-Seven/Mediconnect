@@ -209,10 +209,12 @@ const ProviderResultsPage = () => {
                             Accepts: {provider.accepted_insurances.join(', ')}
                           </Typography>
                         </Grid>
-                        <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                          <Button variant="contained" color="primary" onClick={() => handleProviderSelect(provider)}>
-                            View Details
-                          </Button>
+                        <Grid item xs={12} sm={4} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
+                          <Box sx={{ width: '100%', display: 'flex', justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
+                            <Button variant="contained" color="primary" onClick={() => handleProviderSelect(provider)} sx={{ minWidth: 140 }}>
+                              View Details
+                            </Button>
+                          </Box>
                         </Grid>
                       </Grid>
                     </Paper>

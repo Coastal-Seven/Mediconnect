@@ -98,5 +98,40 @@ You can use any strong random string for these keys.
 ## Installation and Setup
 
 1. Install dependencies:
+
+```bash
+# If using venv (recommended)
+python -m venv myenv
+myenv\Scripts\activate  # On Windows
+# Or: source myenv/bin/activate  # On Mac/Linux
+pip install -r requirements.txt
 ```
+
+2. Set up your `.env` file as described above.
+
+3. Start the backend server:
+
+```bash
+uvicorn main:app --reload
 ```
+
+- The API will be available at `http://localhost:8000` by default.
+- Interactive API docs: `http://localhost:8000/docs`
+
+## Running Tests
+
+If you have tests set up (e.g., with pytest), run:
+
+```bash
+pytest
+```
+
+## Troubleshooting
+
+- **MongoDB Connection Errors:** Ensure MongoDB is running and the URI in your `.env` is correct.
+- **Missing Dependencies:** Double-check you have activated your virtual environment and installed all requirements.
+- **JWT Errors:** Make sure your `SECRET_KEY` and `REFRESH_SECRET_KEY` are set and strong.
+
+## Contact
+
+For questions or support, please open an issue or contact the project maintainer.

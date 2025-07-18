@@ -4,6 +4,8 @@ from models import Provider
 from typing import List, Optional
 import re
 import logging
+from collections.abc import AsyncIterable
+import asyncio
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -13,9 +15,17 @@ async def list_providers():
     """Get all available providers"""
     try:
         providers = []
-        async for p in db.providers.find():
-            p["_id"] = str(p["_id"])
-            providers.append(Provider(**p).dict(by_alias=True))
+        find_result = db.providers.find()
+        # If Motor, find_result is async iterable; if in-memory, it's a coroutine returning a list
+        if isinstance(find_result, AsyncIterable):
+            async for p in find_result:
+                p["_id"] = str(p["_id"])
+                providers.append(Provider(**p).dict(by_alias=True))
+        else:
+            # Await coroutine and iterate as list
+            for p in await find_result:
+                p["_id"] = str(p["_id"])
+                providers.append(Provider(**p).dict(by_alias=True))
         return providers
     except Exception as e:
         logger.error(f"Error fetching providers: {e}")
@@ -36,9 +46,15 @@ async def match_providers(
     """
     try:
         all_providers = []
-        async for p in db.providers.find():
-            p["_id"] = str(p["_id"])
-            all_providers.append(p)
+        find_result = db.providers.find()
+        if isinstance(find_result, AsyncIterable):
+            async for p in find_result:
+                p["_id"] = str(p["_id"])
+                all_providers.append(p)
+        else:
+            for p in await find_result:
+                p["_id"] = str(p["_id"])
+                all_providers.append(p)
         if not all_providers:
             return []
 
@@ -165,13 +181,23 @@ async def match_providers(
         logger.error(f"Error in provider matching: {e}")
         # Fallback: return all providers if matching fails
         providers = []
-        async for p in db.providers.find():
-            p["_id"] = str(p["_id"])
-            if "match_score" not in p:
-                p["match_score"] = 0
-            if "match_reasons" not in p:
-                p["match_reasons"] = ["Selected as fallback"]
-            providers.append(Provider(**p).dict(by_alias=True))
+        find_result = db.providers.find()
+        if isinstance(find_result, AsyncIterable):
+            async for p in find_result:
+                p["_id"] = str(p["_id"])
+                if "match_score" not in p:
+                    p["match_score"] = 0
+                if "match_reasons" not in p:
+                    p["match_reasons"] = ["Selected as fallback"]
+                providers.append(Provider(**p).dict(by_alias=True))
+        else:
+            for p in await find_result:
+                p["_id"] = str(p["_id"])
+                if "match_score" not in p:
+                    p["match_score"] = 0
+                if "match_reasons" not in p:
+                    p["match_reasons"] = ["Selected as fallback"]
+                providers.append(Provider(**p).dict(by_alias=True))
         return providers[:limit]
 
 @router.get("/{provider_id}", response_model=Provider)
