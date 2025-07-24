@@ -14,11 +14,20 @@ import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
 // Add framer-motion import
 import { motion } from 'framer-motion';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import { format } from 'date-fns';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { state, dispatch } = useUserData();
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [rescheduleBookingId, setRescheduleBookingId] = useState(null);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('');
 
   console.log('DashboardPage rendered, user state:', state.user);
 
@@ -49,7 +58,7 @@ const DashboardPage = () => {
         let bookings = await response.json();
         console.log('Raw bookings from backend:', bookings);
         // Show all confirmed bookings, regardless of date
-        const filteredBookings = bookings.filter(b => b.status === "confirmed");
+        const filteredBookings = bookings.filter(b => b.status === "confirmed" || b.status === "pending");
         console.log('Filtered bookings (confirmed & future):', filteredBookings);
         // Fetch provider details for each booking
         const enriched = await Promise.all(filteredBookings.map(async (booking) => {
@@ -168,7 +177,10 @@ const DashboardPage = () => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/bookings/cancel/${bookingId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
       });
       if (response.ok) {
         fetchUserBookings();
@@ -181,31 +193,65 @@ const DashboardPage = () => {
     }
   };
 
-  const handleReschedule = async (bookingId) => {
-    const date = window.prompt('Enter new date (YYYY-MM-DD):');
-    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      alert('Invalid date format. Please use YYYY-MM-DD.');
+  const openRescheduleDialog = (bookingId) => {
+    setRescheduleBookingId(bookingId);
+    setRescheduleDate('');
+    setRescheduleTime('');
+    setRescheduleOpen(true);
+  };
+  const closeRescheduleDialog = () => {
+    setRescheduleOpen(false);
+    setRescheduleBookingId(null);
+    setRescheduleDate('');
+    setRescheduleTime('');
+  };
+
+  const handleRescheduleConfirm = async () => {
+    if (!rescheduleDate || !rescheduleTime) {
+      alert('Please select both date and time.');
       return;
     }
-    const time = window.prompt('Enter new time (HH:MM, 24-hour):');
-    if (!time || !/^\d{2}:\d{2}$/.test(time)) {
-      alert('Invalid time format. Please use HH:MM (24-hour).');
-      return;
-    }
-    const newTime = `${date}T${time}:00`;
+    // Ensure seconds are always present
+    const newTime = `${rescheduleDate}T${rescheduleTime.length === 5 ? rescheduleTime + ':00' : rescheduleTime}`;
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/bookings/reschedule/${bookingId}?new_time=${encodeURIComponent(newTime)}`, {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/bookings/reschedule/${rescheduleBookingId}?new_time=${encodeURIComponent(newTime)}`,
+        { 
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' }
-      });
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        }
+      );
       if (response.ok) {
         fetchUserBookings();
+        closeRescheduleDialog();
       } else {
         alert('Failed to reschedule appointment.');
       }
     } catch (e) {
       alert('Error rescheduling appointment.');
     }
+  };
+
+  const generateAvailableDates = () => {
+    const dates = [];
+    const today = new Date();
+    for (let i = 1; i <= 14; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push(format(date, 'yyyy-MM-dd'));
+    }
+    return dates;
+  };
+  const generateAvailableTimes = () => {
+    const times = [];
+    for (let hour = 9; hour <= 17; hour++) {
+      times.push(`${hour.toString().padStart(2, '0')}:00`);
+      times.push(`${hour.toString().padStart(2, '0')}:30`);
+    }
+    return times;
   };
 
   if (!state.user) {
@@ -358,6 +404,10 @@ const DashboardPage = () => {
                     <Typography variant="body2" sx={{ fontWeight: 600, color: '#333' }}>{formatDate(appointment.date)}</Typography>
                     <Typography variant="body2" sx={{ color: '#666' }}>{appointment.time}</Typography>
                   </Box>
+                  <Stack direction="row" spacing={1}>
+                    <Button variant="outlined" color="error" onClick={() => handleCancel(appointment._id || appointment.id)} sx={{ borderRadius: 2, fontWeight: 600 }}>Cancel</Button>
+                    <Button variant="contained" color="primary" onClick={() => openRescheduleDialog(appointment._id || appointment.id)} sx={{ borderRadius: 2, fontWeight: 600 }}>Reschedule</Button>
+                  </Stack>
                 </Paper>
               ))}
             </Stack>
@@ -365,6 +415,49 @@ const DashboardPage = () => {
         </Paper>
       </Container>
       </Box>
+      <Dialog open={rescheduleOpen} onClose={closeRescheduleDialog}>
+        <DialogTitle>Reschedule Appointment</DialogTitle>
+        <DialogContent>
+          <div style={{ marginBottom: 16 }}>
+            <label htmlFor="reschedule-date" style={{ display: 'block', marginBottom: 4, color: '#333', fontWeight: 500 }}>Select Date</label>
+            <select
+              id="reschedule-date"
+              value={rescheduleDate}
+              onChange={e => setRescheduleDate(e.target.value)}
+              style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc', marginBottom: 12 }}
+            >
+              <option value="">Choose a date</option>
+              {generateAvailableDates().map(date => (
+                <option key={date} value={date}>{format(new Date(date), 'EEEE, MMMM d, yyyy')}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label htmlFor="reschedule-time" style={{ display: 'block', marginBottom: 4, color: '#333', fontWeight: 500 }}>Select Time</label>
+            <select
+              id="reschedule-time"
+              value={rescheduleTime}
+              onChange={e => setRescheduleTime(e.target.value)}
+              style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+            >
+              <option value="">Choose a time</option>
+              {generateAvailableTimes().map(time => (
+                <option key={time} value={time}>{time}</option>
+              ))}
+            </select>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeRescheduleDialog}>Cancel</Button>
+          <Button
+            onClick={handleRescheduleConfirm}
+            variant="contained"
+            disabled={!rescheduleDate || !rescheduleTime}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </motion.div>
   );
 };

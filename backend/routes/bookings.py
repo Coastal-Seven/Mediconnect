@@ -5,6 +5,8 @@ from database import db
 from typing import List
 from datetime import datetime
 import logging
+from email_service import send_confirmation_email, send_cancellation_email, send_rescheduled_email
+from email_templates import EmailTemplate
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -137,6 +139,27 @@ async def confirm_booking(
             if result.modified_count == 0:
                 raise HTTPException(status_code=400, detail="Failed to confirm booking")
             
+            # Prepare email data
+            intake_form_data = await db.intake.find_one({"user_id": current_user.id})
+            email_data = {
+                "user_name": current_user.name,
+                "user_email": current_user.email,
+                "user_phone": current_user.phone,
+                "provider_name": provider["name"],
+                "provider_location": provider["address"],
+                "appointment_time": booking.appointment_time,
+                "symptoms": intake_form_data.get("primarySymptoms"),
+                "duration": intake_form_data.get("duration"),
+                "description": intake_form_data.get("detailedDescription"),
+            }
+
+            # Send confirmation email
+            email_sent = await send_confirmation_email([current_user.email], email_data)
+            if email_sent:
+                logger.info(f"Confirmation email sent to {current_user.email}")
+            else:
+                logger.warning(f"Confirmation email may not have been sent to {current_user.email}")
+            
             logger.info(f"Booking confirmed for user {current_user.id}")
             return {"message": "Booking confirmed successfully", "booking_id": str(existing_booking["_id"])}
         else:
@@ -180,6 +203,23 @@ async def confirm_booking(
             
             result = await db.bookings.insert_one(booking_dict)
             booking_dict["_id"] = str(result.inserted_id)
+
+            # Prepare email data
+            intake_form_data = await db.intake.find_one({"user_id": current_user.id})
+            email_data = {
+                "user_name": current_user.name,
+                "user_email": current_user.email,
+                "user_phone": current_user.phone,
+                "provider_name": provider["name"],
+                "provider_location": provider["address"],
+                "appointment_time": booking.appointment_time,
+                "symptoms": intake_form_data.get("primarySymptoms"),
+                "duration": intake_form_data.get("duration"),
+                "description": intake_form_data.get("detailedDescription"),
+            }
+            
+            # Send confirmation email
+            await send_email([current_user.email], email_data)
             
             logger.info(f"Booking created and confirmed for user {current_user.id}")
             return {"message": "Booking created and confirmed successfully", "booking_id": booking_dict["_id"]}
@@ -250,9 +290,31 @@ async def cancel_booking(
         if booking["user_id"] != current_user.id:
             raise HTTPException(status_code=403, detail="Can only cancel your own bookings")
         
+        # Get provider details for email
+        provider_details = booking.get("provider_details", {})
+        
         result = await db.bookings.delete_one({"_id": booking_object_id})
         if result.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Booking not found or already cancelled")
+        
+        # Send cancellation email
+        try:
+            email_data = {
+                "user_name": current_user.name,
+                "provider_name": provider_details.get("name", "Healthcare Provider"),
+                "provider_location": provider_details.get("address", "Not specified"),
+                "appointment_time": booking.get("appointment_time", "Not specified"),
+                "cancellation_reason": "User requested cancellation",
+                "cancellation_date": datetime.now().strftime("%Y-%m-%d %H:%M")
+            }
+            email_sent = await send_cancellation_email([current_user.email], email_data)
+            if email_sent:
+                logger.info(f"Cancellation email sent to {current_user.email}")
+            else:
+                logger.warning(f"Cancellation email may not have been sent to {current_user.email}")
+        except Exception as e:
+            logger.error(f"Failed to send cancellation email: {str(e)}")
+            # Continue with the cancellation process even if email fails
         
         logger.info(f"Booking {booking_id} cancelled by user {current_user.id}")
         return {"message": "Booking cancelled and deleted successfully"}
@@ -289,6 +351,10 @@ async def reschedule_booking(
         if booking["user_id"] != current_user.id:
             raise HTTPException(status_code=403, detail="Can only reschedule your own bookings")
         
+        # Store the old time for the email
+        old_time = booking.get("appointment_time", "Not specified")
+        provider_details = booking.get("provider_details", {})
+        
         try:
             new_time_dt = datetime.fromisoformat(new_time)
         except Exception:
@@ -306,10 +372,29 @@ async def reschedule_booking(
         if result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Booking not found or could not be rescheduled")
         
+        # Send rescheduled email
+        try:
+            email_data = {
+                "user_name": current_user.name,
+                "provider_name": provider_details.get("name", "Healthcare Provider"),
+                "provider_location": provider_details.get("address", "Not specified"),
+                "old_appointment_time": old_time,
+                "new_appointment_time": new_time,
+                "rescheduled_date": datetime.now().strftime("%Y-%m-%d %H:%M")
+            }
+            email_sent = await send_rescheduled_email([current_user.email], email_data)
+            if email_sent:
+                logger.info(f"Rescheduling email sent to {current_user.email}")
+            else:
+                logger.warning(f"Rescheduling email may not have been sent to {current_user.email}")
+        except Exception as e:
+            logger.error(f"Failed to send rescheduling email: {str(e)}")
+            # Continue with the rescheduling process even if email fails
+        
         logger.info(f"Booking {booking_id} rescheduled by user {current_user.id}")
         return {"message": "Booking rescheduled successfully"}
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error rescheduling booking: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error") 
+        raise HTTPException(status_code=500, detail="Internal server error")

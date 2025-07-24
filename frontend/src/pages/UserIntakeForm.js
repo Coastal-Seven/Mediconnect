@@ -27,6 +27,9 @@ import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 // Add framer-motion import
 import { motion } from 'framer-motion';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
 
 const UserIntakeForm = () => {
   const navigate = useNavigate();
@@ -379,6 +382,422 @@ const UserIntakeForm = () => {
     }
   };
 
+  const steps = [
+    'Personal Details',
+    'Symptoms & Concerns',
+    'Location Information',
+    'Insurance Information',
+  ];
+
+  const getStepFields = (step, formData, errors, handleInputChange, selectedSymptom, setSelectedSymptom, customSymptom, setCustomSymptom, handleAddSymptom, handleRemoveSymptom, commonSymptoms, urgencyLevels, severityLevels, insuranceOptions, insurancePlans) => {
+    switch (step) {
+      case 0:
+        // Personal Details
+        return (
+          <Box mb={5}>
+            <Typography variant="h6" sx={{ color: '#333', mb: 3, fontWeight: 700 }}>Personal Details</Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  label="Name *"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter your full name"
+                  error={!!errors.name}
+                  helperText={errors.name}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  label="Mobile Number *"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  placeholder="Enter your mobile number"
+                  error={!!errors.phoneNumber}
+                  helperText={errors.phoneNumber}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  label="Age *"
+                  name="age"
+                  type="number"
+                  value={formData.age}
+                  onChange={handleInputChange}
+                  placeholder="Enter your age"
+                  error={!!errors.age}
+                  helperText={errors.age}
+                  fullWidth
+                  inputProps={{ min: 1, max: 120 }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  label="Email ID *"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email address"
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        );
+      case 1:
+        // Symptoms & Concerns
+        return (
+          <Box mb={5}>
+            <Typography variant="h6" sx={{ color: '#333', mb: 3, fontWeight: 700 }}>Symptoms & Concerns</Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth error={!!errors.primarySymptoms} sx={{ minWidth: 200 }}>
+                  <InputLabel id="primarySymptoms-label">Primary Symptom(s) or Concern *</InputLabel>
+                  <Select
+                    labelId="primarySymptoms-label"
+                    id="primarySymptomsDropdown"
+                    value={selectedSymptom}
+                    label="Primary Symptom(s) or Concern *"
+                    onChange={e => setSelectedSymptom(e.target.value)}
+                  >
+                    <MenuItem value=""><em>Select a symptom</em></MenuItem>
+                    {commonSymptoms.map(option => (
+                      <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Button onClick={handleAddSymptom} variant="contained" sx={{ mt: 2, ml: 1, borderRadius: 2, fontWeight: 600 }}>Add</Button>
+                <Stack direction="row" spacing={1} mt={2} flexWrap="wrap">
+                  {formData.primarySymptoms.map(symptom => (
+                    <Chip
+                      key={symptom}
+                      label={symptom}
+                      onDelete={() => handleRemoveSymptom(symptom)}
+                      color="primary"
+                      sx={{ mb: 1 }}
+                    />
+                  ))}
+                </Stack>
+                {errors.primarySymptoms && <Typography color="error" variant="body2" mt={1}>{errors.primarySymptoms}</Typography>}
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <FormControl fullWidth error={!!errors.duration} sx={{ minWidth: 200 }}>
+                  <InputLabel id="duration-label">Duration *</InputLabel>
+                  <Select
+                    labelId="duration-label"
+                    id="duration"
+                    name="duration"
+                    value={formData.duration}
+                    label="Duration *"
+                    onChange={handleInputChange}
+                  >
+                    <MenuItem value=""><em>Select duration</em></MenuItem>
+                    <MenuItem value="<1 hour">Less than 1 hour</MenuItem>
+                    <MenuItem value="1-2 hours">1-2 hours</MenuItem>
+                    <MenuItem value="3-7 hours">3-7 hours</MenuItem>
+                    <MenuItem value="8-12 hours">8-12 hours</MenuItem>
+                    <MenuItem value="1 day">1 day</MenuItem>
+                    <MenuItem value="2-3 days">2-3 days</MenuItem>
+                    <MenuItem value="4-7 days">4-7 days</MenuItem>
+                    <MenuItem value="1-2 weeks">1-2 weeks</MenuItem>
+                    <MenuItem value="2-4 weeks">2-4 weeks</MenuItem>
+                    <MenuItem value="1+ months">1+ months</MenuItem>
+                  </Select>
+                </FormControl>
+                {errors.duration && <Typography color="error" variant="body2" mt={1}>{errors.duration}</Typography>}
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <FormControl fullWidth error={!!errors.urgencyLevel} sx={{ minWidth: 200 }}>
+                  <InputLabel id="urgencyLevel-label">Urgency Level *</InputLabel>
+                  <Select
+                    labelId="urgencyLevel-label"
+                    id="urgencyLevel"
+                    name="urgencyLevel"
+                    value={formData.urgencyLevel}
+                    label="Urgency Level *"
+                    onChange={handleInputChange}
+                  >
+                    {urgencyLevels.map(option => (
+                      <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {errors.urgencyLevel && <Typography color="error" variant="body2" mt={1}>{errors.urgencyLevel}</Typography>}
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <FormControl fullWidth error={!!errors.severity} sx={{ minWidth: 200 }}>
+                  <InputLabel id="severity-label">Severity (1-10 scale) *</InputLabel>
+                  <Select
+                    labelId="severity-label"
+                    id="severity"
+                    name="severity"
+                    value={formData.severity}
+                    label="Severity (1-10 scale) *"
+                    onChange={handleInputChange}
+                  >
+                    {severityLevels.map(option => (
+                      <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {errors.severity && <Typography color="error" variant="body2" mt={1}>{errors.severity}</Typography>}
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Detailed Description *"
+                  name="detailedDescription"
+                  value={formData.detailedDescription}
+                  onChange={handleInputChange}
+                  placeholder="Please provide a detailed description of your symptoms, when they started, what makes them better or worse, and any other relevant information..."
+                  error={!!errors.detailedDescription}
+                  helperText={errors.detailedDescription}
+                  fullWidth
+                  multiline
+                  rows={6}
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        );
+      case 2:
+        // Location Information
+        return (
+          <Box mb={5}>
+            <Typography variant="h6" sx={{ color: '#333', mb: 3, fontWeight: 700 }}>Location Information</Typography>
+            <TextField
+              label="Street Address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="Enter your street address"
+              error={!!errors.address}
+              helperText={errors.address}
+              fullWidth
+              sx={{ mb: 3 }}
+            />
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="City"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  placeholder="Enter your city"
+                  error={!!errors.city}
+                  helperText={errors.city}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="State"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleInputChange}
+                  placeholder="Enter your state"
+                  error={!!errors.state}
+                  helperText={errors.state}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Pincode"
+                  name="pincode"
+                  value={formData.pincode}
+                  onChange={handleInputChange}
+                  placeholder="Enter pincode"
+                  error={!!errors.pincode}
+                  helperText={errors.pincode}
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        );
+      case 3:
+        // Insurance Information
+        return (
+          <Box mb={5}>
+            <Typography variant="h6" sx={{ color: '#333', mb: 3, fontWeight: 700 }}>Insurance Information</Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth error={!!errors.insuranceProvider} sx={{ minWidth: 200 }}>
+                  <InputLabel id="insuranceProvider-label">Insurance Provider</InputLabel>
+                  <Select
+                    labelId="insuranceProvider-label"
+                    id="insuranceProvider"
+                    name="insuranceProvider"
+                    value={formData.insuranceProvider}
+                    label="Insurance Provider"
+                    onChange={handleInputChange}
+                  >
+                    {insuranceOptions.map(option => (
+                      <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {errors.insuranceProvider && <Typography color="error" variant="body2" mt={1}>{errors.insuranceProvider}</Typography>}
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <FormControl fullWidth error={!!errors.insurancePlan} disabled={!formData.insuranceProvider} sx={{ minWidth: 200 }}>
+                  <InputLabel id="insurancePlan-label">Plan Type *</InputLabel>
+                  <Select
+                    labelId="insurancePlan-label"
+                    id="insurancePlan"
+                    name="insurancePlan"
+                    value={formData.insurancePlan}
+                    label="Plan Type *"
+                    onChange={handleInputChange}
+                    disabled={!formData.insuranceProvider}
+                  >
+                    {formData.insuranceProvider && insurancePlans[formData.insuranceProvider] 
+                      ? insurancePlans[formData.insuranceProvider].map(option => (
+                          <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                        ))
+                      : <MenuItem value="">Select insurance provider first</MenuItem>
+                    }
+                  </Select>
+                </FormControl>
+                {errors.insurancePlan && <Typography color="error" variant="body2" mt={1}>{errors.insurancePlan}</Typography>}
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  label="Member ID"
+                  name="memberId"
+                  value={formData.memberId}
+                  onChange={handleInputChange}
+                  placeholder="Enter your member ID"
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const [activeStep, setActiveStep] = useState(0);
+
+  const validateStep = (step) => {
+    // Only validate fields for the current step
+    const stepFields = [
+      ['name', 'phoneNumber', 'age', 'email'],
+      ['primarySymptoms', 'duration', 'urgencyLevel', 'severity', 'detailedDescription'],
+      ['address', 'city', 'state', 'pincode'],
+      ['insuranceProvider', 'insurancePlan', 'memberId'],
+    ];
+    const newErrors = {};
+    // Validate only the fields for the current step
+    stepFields[step].forEach(field => {
+      switch (field) {
+        case 'name': {
+          const v = validateName(formData.name);
+          if (!v.isValid) newErrors.name = v.error;
+          break;
+        }
+        case 'phoneNumber': {
+          const v = validatePhoneNumber(formData.phoneNumber);
+          if (!v.isValid) newErrors.phoneNumber = v.error;
+          break;
+        }
+        case 'age': {
+          const v = validateAge(formData.age);
+          if (!v.isValid) newErrors.age = v.error;
+          break;
+        }
+        case 'email': {
+          const v = validateEmail(formData.email);
+          if (!v.isValid) newErrors.email = v.error;
+          break;
+        }
+        case 'primarySymptoms': {
+          const v = validateSymptoms(formData.primarySymptoms);
+          if (!v.isValid) newErrors.primarySymptoms = v.error;
+          break;
+        }
+        case 'duration': {
+          if (!formData.duration) newErrors.duration = 'Duration is required';
+          break;
+        }
+        case 'urgencyLevel': {
+          if (!formData.urgencyLevel) newErrors.urgencyLevel = 'Urgency level is required';
+          break;
+        }
+        case 'severity': {
+          if (!formData.severity) newErrors.severity = 'Severity level is required';
+          break;
+        }
+        case 'detailedDescription': {
+          if (!formData.detailedDescription.trim()) {
+            newErrors.detailedDescription = 'Detailed description is required';
+          } else if (!formData.detailedDescription.includes(' ')) {
+            newErrors.detailedDescription = 'Please enter a valid description with spaces.';
+          }
+          break;
+        }
+        case 'address': {
+          const v = validateLocation(formData.address);
+          if (!v.isValid) newErrors.address = v.error;
+          else if (formData.address.length < 5) newErrors.address = 'Please enter a valid address (at least 5 characters).';
+          break;
+        }
+        case 'city': {
+          const v = validateLocation(formData.city);
+          if (!v.isValid) newErrors.city = v.error;
+          else if (!formData.city.trim()) newErrors.city = 'City is required';
+          else if (!/^[A-Za-z ]+$/.test(formData.city.trim())) newErrors.city = 'City must contain only letters and spaces.';
+          break;
+        }
+        case 'state': {
+          if (!formData.state.trim()) newErrors.state = 'State is required';
+          else if (!/^[A-Za-z ]+$/.test(formData.state)) newErrors.state = 'State must contain only letters and spaces.';
+          break;
+        }
+        case 'pincode': {
+          const v = validatePincode(formData.pincode);
+          if (!v.isValid) newErrors.pincode = v.error;
+          break;
+        }
+        case 'insuranceProvider': {
+          if (!formData.insuranceProvider) newErrors.insuranceProvider = 'Insurance provider is required';
+          break;
+        }
+        case 'insurancePlan': {
+          if (!formData.insurancePlan) newErrors.insurancePlan = 'Please select your insurance plan';
+          break;
+        }
+        case 'memberId': {
+          if (!formData.memberId || !formData.memberId.trim()) newErrors.memberId = 'Member ID is required';
+          break;
+        }
+        default:
+          break;
+      }
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(activeStep)) {
+      setActiveStep(prev => prev + 1);
+    }
+  };
+
+  const handleBack = () => {
+    setActiveStep(prev => prev - 1);
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', p: 3 }}>
       <motion.div
@@ -423,303 +842,61 @@ const UserIntakeForm = () => {
               }
             </Typography>
           </Box>
+          <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 5 }}>
+            {steps.map(label => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
           <Box component="form" onSubmit={handleSubmit} noValidate>
-            {/* Personal Details */}
-            <Box mb={5}>
-              <Typography variant="h6" sx={{ color: '#333', mb: 3, fontWeight: 700 }}>Personal Details</Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    label="Name *"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Enter your full name"
-                    error={!!errors.name}
-                    helperText={errors.name}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    label="Mobile Number *"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    placeholder="Enter your mobile number"
-                    error={!!errors.phoneNumber}
-                    helperText={errors.phoneNumber}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    label="Age *"
-                    name="age"
-                    type="number"
-                    value={formData.age}
-                    onChange={handleInputChange}
-                    placeholder="Enter your age"
-                    error={!!errors.age}
-                    helperText={errors.age}
-                    fullWidth
-                    inputProps={{ min: 1, max: 120 }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    label="Email ID *"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="Enter your email address"
-                    error={!!errors.email}
-                    helperText={errors.email}
-                    fullWidth
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-            {/* Symptoms & Concerns */}
-            <Box mb={5}>
-              <Typography variant="h6" sx={{ color: '#333', mb: 3, fontWeight: 700 }}>Symptoms & Concerns</Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth error={!!errors.primarySymptoms} sx={{ minWidth: 200 }}>
-                    <InputLabel id="primarySymptoms-label">Primary Symptom(s) or Concern *</InputLabel>
-                    <Select
-                      labelId="primarySymptoms-label"
-                      id="primarySymptomsDropdown"
-                      value={selectedSymptom}
-                      label="Primary Symptom(s) or Concern *"
-                      onChange={e => setSelectedSymptom(e.target.value)}
-                    >
-                      <MenuItem value=""><em>Select a symptom</em></MenuItem>
-                      {commonSymptoms.map(option => (
-                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <Button onClick={handleAddSymptom} variant="contained" sx={{ mt: 2, ml: 1, borderRadius: 2, fontWeight: 600 }}>Add</Button>
-                  <Stack direction="row" spacing={1} mt={2} flexWrap="wrap">
-                    {formData.primarySymptoms.map(symptom => (
-                      <Chip
-                        key={symptom}
-                        label={symptom}
-                        onDelete={() => handleRemoveSymptom(symptom)}
-                        color="primary"
-                        sx={{ mb: 1 }}
-                      />
-                    ))}
-                  </Stack>
-                  {errors.primarySymptoms && <Typography color="error" variant="body2" mt={1}>{errors.primarySymptoms}</Typography>}
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <FormControl fullWidth error={!!errors.duration} sx={{ minWidth: 200 }}>
-                    <InputLabel id="duration-label">Duration *</InputLabel>
-                    <Select
-                      labelId="duration-label"
-                      id="duration"
-                      name="duration"
-                      value={formData.duration}
-                      label="Duration *"
-                      onChange={handleInputChange}
-                    >
-                      <MenuItem value=""><em>Select duration</em></MenuItem>
-                      <MenuItem value="<1 hour">Less than 1 hour</MenuItem>
-                      <MenuItem value="1-2 hours">1-2 hours</MenuItem>
-                      <MenuItem value="3-7 hours">3-7 hours</MenuItem>
-                      <MenuItem value="8-12 hours">8-12 hours</MenuItem>
-                      <MenuItem value="1 day">1 day</MenuItem>
-                      <MenuItem value="2-3 days">2-3 days</MenuItem>
-                      <MenuItem value="4-7 days">4-7 days</MenuItem>
-                      <MenuItem value="1-2 weeks">1-2 weeks</MenuItem>
-                      <MenuItem value="2-4 weeks">2-4 weeks</MenuItem>
-                      <MenuItem value="1+ months">1+ months</MenuItem>
-                    </Select>
-                  </FormControl>
-                  {errors.duration && <Typography color="error" variant="body2" mt={1}>{errors.duration}</Typography>}
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <FormControl fullWidth error={!!errors.urgencyLevel} sx={{ minWidth: 200 }}>
-                    <InputLabel id="urgencyLevel-label">Urgency Level *</InputLabel>
-                    <Select
-                      labelId="urgencyLevel-label"
-                      id="urgencyLevel"
-                      name="urgencyLevel"
-                      value={formData.urgencyLevel}
-                      label="Urgency Level *"
-                      onChange={handleInputChange}
-                    >
-                      {urgencyLevels.map(option => (
-                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {errors.urgencyLevel && <Typography color="error" variant="body2" mt={1}>{errors.urgencyLevel}</Typography>}
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <FormControl fullWidth error={!!errors.severity} sx={{ minWidth: 200 }}>
-                    <InputLabel id="severity-label">Severity (1-10 scale) *</InputLabel>
-                    <Select
-                      labelId="severity-label"
-                      id="severity"
-                      name="severity"
-                      value={formData.severity}
-                      label="Severity (1-10 scale) *"
-                      onChange={handleInputChange}
-                    >
-                      {severityLevels.map(option => (
-                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {errors.severity && <Typography color="error" variant="body2" mt={1}>{errors.severity}</Typography>}
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Detailed Description *"
-                    name="detailedDescription"
-                    value={formData.detailedDescription}
-                    onChange={handleInputChange}
-                    placeholder="Please provide a detailed description of your symptoms, when they started, what makes them better or worse, and any other relevant information..."
-                    error={!!errors.detailedDescription}
-                    helperText={errors.detailedDescription}
-                    fullWidth
-                    multiline
-                    rows={4}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-            {/* Location Information */}
-            <Box mb={5}>
-              <Typography variant="h6" sx={{ color: '#333', mb: 3, fontWeight: 700 }}>Location Information</Typography>
-              <TextField
-                label="Street Address"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                placeholder="Enter your street address"
-                error={!!errors.address}
-                helperText={errors.address}
-                fullWidth
-                sx={{ mb: 3 }}
-              />
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="City"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    placeholder="Enter your city"
-                    error={!!errors.city}
-                    helperText={errors.city}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="State"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    placeholder="Enter your state"
-                    error={!!errors.state}
-                    helperText={errors.state}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="Pincode"
-                    name="pincode"
-                    value={formData.pincode}
-                    onChange={handleInputChange}
-                    placeholder="Enter pincode"
-                    error={!!errors.pincode}
-                    helperText={errors.pincode}
-                    fullWidth
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-            {/* Insurance Information */}
-            <Box mb={5}>
-              <Typography variant="h6" sx={{ color: '#333', mb: 3, fontWeight: 700 }}>Insurance Information</Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth error={!!errors.insuranceProvider} sx={{ minWidth: 200 }}>
-                    <InputLabel id="insuranceProvider-label">Insurance Provider</InputLabel>
-                    <Select
-                      labelId="insuranceProvider-label"
-                      id="insuranceProvider"
-                      name="insuranceProvider"
-                      value={formData.insuranceProvider}
-                      label="Insurance Provider"
-                      onChange={handleInputChange}
-                    >
-                      {insuranceOptions.map(option => (
-                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {errors.insuranceProvider && <Typography color="error" variant="body2" mt={1}>{errors.insuranceProvider}</Typography>}
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <FormControl fullWidth error={!!errors.insurancePlan} disabled={!formData.insuranceProvider} sx={{ minWidth: 200 }}>
-                    <InputLabel id="insurancePlan-label">Plan Type *</InputLabel>
-                    <Select
-                      labelId="insurancePlan-label"
-                      id="insurancePlan"
-                      name="insurancePlan"
-                      value={formData.insurancePlan}
-                      label="Plan Type *"
-                      onChange={handleInputChange}
-                      disabled={!formData.insuranceProvider}
-                    >
-                      {formData.insuranceProvider && insurancePlans[formData.insuranceProvider] 
-                        ? insurancePlans[formData.insuranceProvider].map(option => (
-                            <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
-                          ))
-                        : <MenuItem value="">Select insurance provider first</MenuItem>
-                      }
-                    </Select>
-                  </FormControl>
-                  {errors.insurancePlan && <Typography color="error" variant="body2" mt={1}>{errors.insurancePlan}</Typography>}
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    label="Member ID"
-                    name="memberId"
-                    value={formData.memberId}
-                    onChange={handleInputChange}
-                    placeholder="Enter your member ID"
-                    fullWidth
-                  />
-                </Grid>
-              </Grid>
-            </Box>
+            {getStepFields(
+              activeStep,
+              formData,
+              errors,
+              handleInputChange,
+              selectedSymptom,
+              setSelectedSymptom,
+              customSymptom,
+              setCustomSymptom,
+              handleAddSymptom,
+              handleRemoveSymptom,
+              commonSymptoms,
+              urgencyLevels,
+              severityLevels,
+              insuranceOptions,
+              insurancePlans
+            )}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mt={5}>
               <Button
                 type="button"
                 variant="outlined"
                 color="primary"
-                onClick={() => navigate('/dashboard')}
+                onClick={activeStep === 0 ? () => navigate('/dashboard') : handleBack}
                 sx={{ borderRadius: 2, fontWeight: 600, flex: 1 }}
               >
-                Back to Dashboard
+                {activeStep === 0 ? 'Back to Dashboard' : 'Back'}
               </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                sx={{ borderRadius: 2, fontWeight: 600, flex: 2 }}
-              >
-                Submit Intake Form
-              </Button>
+              {activeStep < steps.length - 1 ? (
+                <Button
+                  type="button"
+                  variant="contained"
+                  color="primary"
+                  onClick={handleNext}
+                  sx={{ borderRadius: 2, fontWeight: 600, flex: 2 }}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  sx={{ borderRadius: 2, fontWeight: 600, flex: 2 }}
+                >
+                  Submit Intake Form
+                </Button>
+              )}
             </Stack>
           </Box>
         </Paper>

@@ -65,26 +65,18 @@ async def match_providers(
             location_score = 0
             symptom_score = 0
             bonus_score = 0
-            # Insurance matching (up to 35 points)
+            # Insurance matching (up to 35 points) - Case-insensitive
             if insurance and provider.get("accepted_insurances"):
                 insurance_lower = insurance.lower()
                 provider_insurances = [ins.lower() for ins in provider["accepted_insurances"]]
-                if insurance_lower in provider_insurances:
+                if any(insurance_lower in ins for ins in provider_insurances):
                     insurance_score = 35
                     reasons.append(f"Accepts {insurance}")
-                elif any(insurance_lower in ins or ins in insurance_lower for ins in provider_insurances):
-                    insurance_score = 30
-                    reasons.append(f"Accepts similar insurance")
-            # Location matching (up to 20 points)
+            # Location matching (up to 20 points) - Case-insensitive
             if location and provider.get("city"):
-                location_lower = location.lower()
-                provider_city = provider["city"].lower()
-                if location_lower == provider_city:
+                if location.lower() == provider.get("city").lower():
                     location_score = 20
                     reasons.append(f"Located in {provider['city']}")
-                elif location_lower in provider_city or provider_city in location_lower:
-                    location_score = 10
-                    reasons.append(f"Near {provider['city']}")
             # Symptom-specialty matching (up to 35 points for mapped, 30 for generalist)
             if symptoms and provider.get("specialty"):
                 if isinstance(symptoms, str):

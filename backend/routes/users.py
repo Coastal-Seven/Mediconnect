@@ -4,6 +4,8 @@ from datetime import datetime
 from database import db
 from models import UserCreate, UserLogin, UserOut, Token, RefreshToken
 from auth import get_password_hash, verify_password, create_access_token, create_refresh_token, verify_refresh_token, get_current_user, ACCESS_TOKEN_EXPIRE_HOURS
+from email_service import send_welcome_email
+from email_templates import EmailTemplate
 import logging
 
 # Configure logging
@@ -34,6 +36,21 @@ async def register(user: UserCreate):
         # Insert user into database
         result = await db.users.insert_one(user_dict)
         user_dict["_id"] = str(result.inserted_id)
+        
+        # Send welcome email
+        try:
+            email_data = {
+                "user_name": user.name,
+                "login_url": "/login"
+            }
+            email_sent = await send_welcome_email([user.email], email_data)
+            if email_sent:
+                logger.info(f"Welcome email sent to {user.email}")
+            else:
+                logger.warning(f"Welcome email may not have been sent to {user.email}")
+        except Exception as e:
+            logger.error(f"Failed to send welcome email: {str(e)}")
+            # Continue with registration even if email fails
         
         logger.info(f"User registered successfully: {user.email}")
         return UserOut(**user_dict).dict(by_alias=True)
@@ -148,4 +165,4 @@ async def get_user(user_id: str):
         raise
     except Exception as e:
         logger.error(f"Get user error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error") 
+        raise HTTPException(status_code=500, detail="Internal server error")

@@ -209,9 +209,14 @@ const ProviderResultsPage = () => {
                             Accepts: {provider.accepted_insurances.join(', ')}
                           </Typography>
                         </Grid>
-                        <Grid item xs={12} sm={4} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
-                          <Box sx={{ width: '100%', display: 'flex', justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
-                            <Button variant="contained" color="primary" onClick={() => handleProviderSelect(provider)} sx={{ minWidth: 140 }}>
+                        <Grid item xs={12} sm={4} sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => handleProviderSelect(provider)}
+                              sx={{ minWidth: 180 }}
+                            >
                               View Details
                             </Button>
                           </Box>
@@ -223,7 +228,7 @@ const ProviderResultsPage = () => {
               </Stack>
             </Box>
           )}
-          <Stack direction="row" spacing={2} mt={5} justifyContent="center">
+          <Stack direction="row" spacing={2} mt={5} justifyContent="left">
             <Button variant="outlined" color="primary" onClick={() => navigate('/intake')}>
               Back to Search
             </Button>

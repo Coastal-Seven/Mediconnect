@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from routes import users, providers, bookings, intake, insurance , ai_gemini
+from email_service import send_email
+from email_templates import EmailTemplate
 import logging
 
 # Configure logging
@@ -23,6 +25,28 @@ app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
 app.include_router(intake.router, prefix="/api/intake", tags=["Intake"])
 app.include_router(insurance.router, prefix="/api/insurance", tags=["Insurance"])
 app.include_router(ai_gemini.router, prefix="/api/ai/gemini-care-tips", tags=["AIGeneratedCare"])
+
+router = APIRouter()
+
+# Include the router for appointments
+app.include_router(router, prefix="/api", tags=["Appointments"])
+
+@router.post("/appointments/")
+async def create_appointment(appointment: dict):
+    try:
+        # Your appointment creation logic here
+        
+        # Send confirmation email
+        recipients = [appointment.get('email')]
+        await send_email(
+            recipients=recipients,
+            data=appointment,
+            template_type=EmailTemplate.APPOINTMENT_CONFIRMATION
+        )
+        
+        return {"message": "Appointment created and confirmation email sent"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/")
 def root():
